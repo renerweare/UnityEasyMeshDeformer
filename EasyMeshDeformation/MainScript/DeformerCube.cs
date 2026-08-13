@@ -55,7 +55,7 @@ namespace EasyMeshDeformation
 		[SerializeField] private SelectionFalloffMode _selectionFalloffMode = SelectionFalloffMode.Relative;
 
 		/// <summary>影响范围（按分辨率比例，0~1）：0.1 = 仅影响紧邻控制点，1 = 整个晶格。</summary>
-		[Tooltip("影响范围（按分辨率比例，0~1）：0.1 = 仅影响紧邻控制点，1 = 整个晶格。")]
+		[Tooltip("影响范围（按分辨率比例，0~1）：0.1 = 仅影响紧邻控制点，1 = 整个格子。")]
 		[SerializeField, Range(0f, 1f)] private float _selectionFalloffAmount = 0.25f;
 
 		/// <summary>影响范围（手动）：影响的控制点个数，范围 0 ~ 最大分辨率。</summary>

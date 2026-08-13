@@ -26,13 +26,13 @@ namespace EasyMeshDeformation
 			Scale = 4,
 		}
 
-		[SerializeField, Tooltip("要参照并变形的 Transform（其原点应落在晶格内）。")]
+		[SerializeField, Tooltip("要参照并变形的 Transform（其原点应落在格子内）。")]
 		private Transform _targetTransform;
 
 		[SerializeField, Tooltip("要应用的分量：位置 / 旋转 / 缩放。默认应用位置与旋转。")]
 		private ApplyFlags _applyMethod = ApplyFlags.Position | ApplyFlags.Rotation;
 
-		[SerializeField, Tooltip("应用于目标 Transform 的晶格项，按顺序依次施加变形。")]
+		[SerializeField, Tooltip("应用于目标 Transform 的格子项，按顺序依次施加变形。")]
 		private List<DeformerItem> _items = new()
 		{
 			new DeformerItem()

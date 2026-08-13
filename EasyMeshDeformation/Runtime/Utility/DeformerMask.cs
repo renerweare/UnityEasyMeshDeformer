@@ -46,7 +46,7 @@ namespace EasyMeshDeformation
 				" - 材质：仅对使用该材质的顶点应用变形。";
 
 			private const string IndexTooltip = 
-				"用作遮罩的材质索引。晶格变形只会应用到Mesh中使用此材质的部分。";
+				"用作遮罩的材质索引。格子变形只会应用到Mesh中使用此材质的部分。";
 
 			/// 遮罩类型（应用于全部 / 材质）。
 			[Tooltip(TypeTooltip)]

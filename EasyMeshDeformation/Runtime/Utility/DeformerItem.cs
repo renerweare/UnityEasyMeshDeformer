@@ -10,7 +10,7 @@ namespace EasyMeshDeformation
 	[Serializable]
 	public struct DeformerItem : ISerializationCallbackReceiver
 	{
-		private const string DeformerCubeTooltip = "要应用的晶格。";
+		private const string DeformerCubeTooltip = "要应用的格子。";
 
 		private const string InterpolationTooltip =
 			"插值方式：\n" +
@@ -19,9 +19,9 @@ namespace EasyMeshDeformation
 			" - 三次方：三次插值，效果优于线性但开销更高。";
 
 		private const string GlobalTooltip =
-			"晶格外部的变形处理方式：\n" +
-			" - 禁用：晶格外部的变形会逐渐衰减。\n" +
-			" - 启用：变形会延续到晶格外部，与外部控制点保持一致。";
+			"格子外部的变形处理方式：\n" +
+			" - 禁用：格子外部的变形会逐渐衰减。\n" +
+			" - 启用：变形会延续到格子外部，与外部控制点保持一致。";
 
 		private const string MaskTooltip =
 			"遮罩选项。可用于控制Mesh上的变形范围。";

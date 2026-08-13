@@ -25,12 +25,12 @@ namespace EasyMeshDeformation
 
 		/// <summary>「更新模式」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string UpdateModeTooltip =
-			"变形何时更新。仅适用于非蒙皮晶格。\n" +
+			"变形何时更新。仅适用于非蒙皮格子。\n" +
 			"若设为「手动」，必须调用 RequestUpdate()。";
 
 		/// <summary>「晶格列表」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string ItemsTooltip =
-			"应用于目标Mesh的晶格。\n" +
+			"应用于目标Mesh的格子。\n" +
 			"将按顺序在蒙皮之前应用。";
 
 		/// <summary>顶点缓冲的 GraphicsBuffer 目标类型：Raw + CopySource/CopyDestination（每帧拷贝原始顶点用于复位）。</summary>

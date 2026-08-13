@@ -34,7 +34,7 @@ namespace EasyMeshDeformation
 		[SerializeField, Tooltip("弹簧加速度：控制点回归基准位置的回弹力度，越大回弹越猛。")]
 		private float _acceleration;
 
-		[SerializeField, Tooltip("晶格池：每次按下鼠标轮换一个 DeformerCube 供拖拽，松手后各自回弹。")]
+		[SerializeField, Tooltip("格子池：每次按下鼠标轮换一个 DeformerCube 供拖拽，松手后各自回弹。")]
 		private DeformerCube[] _deformerCubes;
 
 		private int _cubeIndex;

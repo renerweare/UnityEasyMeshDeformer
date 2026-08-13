@@ -44,8 +44,8 @@ namespace EasyMeshDeformation.Editor
 			Rect rect = position;
 			rect.height = LineHeight;
 
-			// 第 1 行：晶格引用
-			EditorGUI.PropertyField(rect, cube, new GUIContent("DeformerCube", "要应用的晶格（DeformerCube 组件）。"));
+			// 第 1 行：格子引用
+			EditorGUI.PropertyField(rect, cube, new GUIContent("DeformerCube", "要应用的格子（DeformerCube 组件）。"));
 			Next();
 			// 第 2 行：插值方式
 			EditorGUI.PropertyField(rect, interpolation, new GUIContent("Compute Method",
@@ -56,12 +56,12 @@ namespace EasyMeshDeformation.Editor
 			Next();
 			// 第 3 行：Global 开关
 			EditorGUI.PropertyField(rect, global, new GUIContent("Global",
-				"晶格外部的变形处理方式：\n" +
-				" - 禁用：晶格外部的变形会逐渐衰减。\n" +
-				" - 启用：变形会延续到晶格外部，与外部控制点保持一致。"));
+				"格子外部的变形处理方式：\n" +
+				" - 禁用：格子外部的变形会逐渐衰减。\n" +
+				" - 启用：变形会延续到格子外部，与外部控制点保持一致。"));
 			Next();
 			// 第 4 行：遮罩乘数（0~1 滑杆）
-			EditorGUI.Slider(rect, multiplier, 0f, 1f, new GUIContent("Multiplier", "该晶格的变形强度（0~1，默认 1）。"));
+			EditorGUI.Slider(rect, multiplier, 0f, 1f, new GUIContent("Multiplier", "该格子的变形强度（0~1，默认 1）。"));
 
 			EditorGUI.EndProperty();
 
