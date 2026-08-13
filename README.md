@@ -4,10 +4,10 @@
 
 ## 功能
 
-- **FFD 晶格变形**：用 DeformerCube（3D 控制点网格）包裹物体，拖动控制点即实时变形网格。
+- **FFD 网格变形**：用 DeformerCube（3D 控制点网格）包裹物体，拖动控制点即实时变形网格。
 - **两种模式（一个组件）**：`MeshDeformer` 通过「模式」下拉切换：
-  - **网格**：变形 `MeshFilter` + `MeshRenderer` 的网格。
-  - **蒙皮网格**：变形 `SkinnedMeshRenderer` 的蒙皮网格（先 GPU 蒙皮，后晶格变形）。
+  - **mesh**：变形 `MeshFilter` + `MeshRenderer` 的网格。
+  - **Skined mesh**：变形 `SkinnedMeshRenderer` 的蒙皮网格（先 GPU 蒙皮，后晶格变形）。
 - **GPU / CPU 双实现**：运行时用 Compute Shader（`DeformCompute.compute`）逐帧变形；CPU 侧 `DeformSolver` 供编辑器预览与烘焙。
 - **三种插值方式**：线性（清晰）/ 线性（平滑）/ 三次方。
 - **Global 开关**：晶格外变形衰减（关）/ 延续（开）。
@@ -41,5 +41,4 @@
 - **蒙皮网格报「GPU 蒙皮未启用」？** 在 `Edit > Project Settings > Player` 勾选 GPU Skinning。
 
 ## 许可证
-
-本项目为学习/复刻用途，基于开源资源 *Lattice Modifier*（Heath）改造，请遵循原资源许可证。
+MIT
