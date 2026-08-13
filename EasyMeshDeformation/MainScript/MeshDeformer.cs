@@ -39,32 +39,26 @@ namespace EasyMeshDeformation
 
 		#region Fields
 
-		/// <summary>变形目标类型（Mesh / Skinned Mesh），在 Inspector 中切换。</summary>
+		//变形目标类型（Mesh / Skinned Mesh），在 Inspector 中切换
 		[SerializeField, Tooltip(ModeTooltip)]
 		private Mode _mode = Mode.Mesh;
 
 		// Mesh模式
-		/// <summary>Mesh模式使用的 MeshFilter 组件（懒获取并缓存）。</summary>
-		private MeshFilter _meshFilter;
-		/// <summary>Mesh模式使用的 MeshRenderer 组件（懒获取并缓存）。</summary>
-		private MeshRenderer _meshRenderer;
+		private MeshFilter _meshFilter;     
+		private MeshRenderer _meshRenderer; 
 
 		// Skinned Mesh模式
-		/// <summary>Skinned Mesh模式使用的 SkinnedMeshRenderer 组件（懒获取并缓存）。</summary>
-		private SkinnedMeshRenderer _skinnedMeshRenderer;
-		/// <summary>GPU 蒙皮后的顶点缓冲（每次 Enqueue 时从渲染器重新获取）。</summary>
-		private GraphicsBuffer _skinnedVertexBuffer;
-		/// <summary>蒙皮模式的本地→世界矩阵（基于根骨骼），供 compute shader 计算蒙皮结果变换。</summary>
-		private Matrix4x4 _skinnedLocalToWorld;
+		private SkinnedMeshRenderer _skinnedMeshRenderer;//Skinned Mesh模式使用的 SkinnedMeshRenderer 组件（懒获取并缓存）
+		private GraphicsBuffer _skinnedVertexBuffer;	 //GPU skinned后的顶点缓冲（每次 Enqueue 时从渲染器重新获取）
+		private Matrix4x4 _skinnedLocalToWorld;		     //skinned模式的本地→世界矩阵（基于根骨骼），供 compute shader 计算skin结果变换
 
-		/// <summary>当前生效的模式（与 _mode 区分：_mode 是序列化值，可能在 Inspector 中被即时修改）。</summary>
-		private Mode _currentMode;
+		private Mode _currentMode; //当前生效的模式
 
 		#endregion
 
 		#region Properties
 
-		/// <summary>变形目标类型；设置新值时先恢复旧渲染器Mesh，再切换并重新初始化。</summary>
+		//设置新值时先恢复旧渲染器Mesh，再切换并重新初始化
 		public Mode DeformMode
 		{
 			get => _mode;
@@ -81,17 +75,15 @@ namespace EasyMeshDeformation
 			}
 		}
 
-		/// <summary>获取当前物体上的 MeshRenderer 组件（懒加载并缓存）。</summary>
+		//获取当前物体上的 MeshRenderer MeshFilter SkinnedMeshRenderer 组件
 		private MeshRenderer MeshRenderer => (_meshRenderer == null)
 			? _meshRenderer = GetComponent<MeshRenderer>()
 			: _meshRenderer;
 
-		/// <summary>获取当前物体上的 MeshFilter 组件（懒加载并缓存）。</summary>
 		private MeshFilter MeshFilter => (_meshFilter == null)
 			? _meshFilter = GetComponent<MeshFilter>()
 			: _meshFilter;
 
-		/// <summary>获取当前物体上的 SkinnedMeshRenderer 组件（懒加载并缓存）。</summary>
 		private SkinnedMeshRenderer SkinnedMeshRenderer => (_skinnedMeshRenderer == null)
 			? _skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>()
 			: _skinnedMeshRenderer;
@@ -101,7 +93,7 @@ namespace EasyMeshDeformation
 		#region Protected Methods
 
 		/// <inheritdoc cref="MeshDeformerBase.GetMesh"/>
-		/// <summary>按当前模式获取渲染器上的Mesh（蒙皮模式返回 sharedMesh，否则 MeshFilter.sharedMesh）。</summary>
+		/// <summary>按当前模式获取渲染器上的Mesh（skin模式返回 sharedMesh，否则 MeshFilter.sharedMesh）。</summary>
 		protected override Mesh GetMesh()
 		{
 			if (_mode == Mode.Skinned) return SkinnedMeshRenderer != null ? SkinnedMeshRenderer.sharedMesh : null;
@@ -109,7 +101,7 @@ namespace EasyMeshDeformation
 		}
 
 		/// <inheritdoc cref="MeshDeformerBase.SetMesh"/>
-		/// <summary>按当前模式把Mesh写入渲染器；蒙皮模式保证至少一根骨骼使 GPU 蒙皮走正确缓冲路径。</summary>
+
 		protected override void SetMesh(Mesh mesh)
 		{
 			if (_mode == Mode.Skinned)
