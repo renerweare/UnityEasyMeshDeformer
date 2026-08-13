@@ -23,7 +23,7 @@ namespace EasyMeshDeformation.Editor
 		private SelectedHandles _selectedHandles;
 		/// <summary>晶格盒 Gizmo 绘制器（未选中控制点时绘制晶格盒子与中心点）。</summary>
 		private DeformerGizmos _cubeGizmos;
-		/// <summary>晶格线框绘制器（绘制晶格控制点连线网格）。</summary>
+		/// <summary>晶格线框绘制器（绘制晶格控制点连线Mesh）。</summary>
 		private DeformerDrawer _cubeDrawer;
 		/// <summary>控制点 Gizmo 绘制器（选中控制点时绘制平移/旋转/缩放手柄）。</summary>
 		private HandleGizmos _handleGizmos;

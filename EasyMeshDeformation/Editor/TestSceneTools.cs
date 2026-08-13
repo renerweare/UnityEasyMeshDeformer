@@ -2,7 +2,7 @@
 // 文件：TestSceneTools.cs
 // 作用：临时测试工具（菜单：EasyMeshDeformation/重建测试晶格并绑定）。
 //       一键为场景中所有 MeshDeformer 重建干净的 DeformerCube，
-//       自动 Fit 包裹网格并绑定到晶格列表，用于清理
+//       自动 Fit 包裹Mesh并绑定到晶格列表，用于清理
 //       "新旧系统混用"后留下的测试环境。
 // ============================================================================
 using UnityEditor;
@@ -26,7 +26,7 @@ namespace EasyMeshDeformation.Editor
 				// 以变形器自身作为适配基准
 				Transform target = deformer.transform;
 
-				// 创建独立的晶格对象（根对象，不跟随网格变换）
+				// 创建独立的晶格对象（根对象，不跟随Mesh变换）
 				GameObject go = new("DeformerCube");
 				go.transform.position = target.position;
 

@@ -1,6 +1,6 @@
 // ============================================================================
 // BakeLookup.cs
-// 概述：烘焙结果缓存表：以"目标网格 + 修改器配置"为键缓存变形网格，
+// 概述：烘焙结果缓存表：以"目标Mesh + 修改器配置"为键缓存变形Mesh，
 // 批量烘焙时复用相同配置的计算结果，避免重复执行昂贵的变形计算。
 // 配置比对：BakedSettings 记录应用方式、晶格变换矩阵、分辨率与手柄偏移，
 // 通过浮点阈值 Threshold 判定是否一致。
@@ -10,16 +10,16 @@ using UnityEngine;
 
 namespace EasyMeshDeformation.Editor
 {
-	/// <summary>存储变形网格的字典，以及对相似/相同修改器的查找表（按目标网格分组，每条记录绑定配置快照）。</summary>
+	/// <summary>存储变形Mesh的字典，以及对相似/相同修改器的查找表（按目标Mesh分组，每条记录绑定配置快照）。</summary>
 	internal class BakeLookup
 	{
 		/// <summary>浮点比对阈值：配置差异小于该值即视为一致。</summary>
 		private const float Threshold = 0.0001f;
 
-		/// <summary>烘焙缓存字典：键为目标网格，值为该网格下的一组烘焙记录。</summary>
+		/// <summary>烘焙缓存字典：键为目标Mesh，值为该Mesh下的一组烘焙记录。</summary>
 		private readonly Dictionary<Mesh, List<Bake>> _bakedMeshes = new();
 
-		/// <summary>清空全部缓存：销毁临时生成的变形网格并清空字典。</summary>
+		/// <summary>清空全部缓存：销毁临时生成的变形Mesh并清空字典。</summary>
 		internal void Clear()
 		{
 			foreach ((Mesh mesh, List<Bake> bakes) in _bakedMeshes)
@@ -32,15 +32,15 @@ namespace EasyMeshDeformation.Editor
 			_bakedMeshes.Clear();
 		}
 
-		/// <summary>尝试从缓存中获取与指定修改器配置匹配的变形网格。</summary>
+		/// <summary>尝试从缓存中获取与指定修改器配置匹配的变形Mesh。</summary>
 		/// <param name="modifier">当前要烘焙的修改器组件。</param>
-		/// <param name="mesh">找到的缓存变形网格；未命中时为 null。</param>
+		/// <param name="mesh">找到的缓存变形Mesh；未命中时为 null。</param>
 		/// <returns>true 表示命中可复用，false 表示需要重新计算。</returns>
 		internal bool TryGet(MeshDeformer modifier, out Mesh mesh)
 		{
 			mesh = null;
 
-			// 按目标网格定位分组；不存在则判定未命中
+			// 按目标Mesh定位分组；不存在则判定未命中
 			if (!_bakedMeshes.TryGetValue(modifier.TargetMesh, out List<Bake> bakes))
 				return false;
 
@@ -49,7 +49,7 @@ namespace EasyMeshDeformation.Editor
 
 			foreach (Bake bake in bakes)
 			{
-				// 配置一致（分辨率、矩阵、手柄偏移均在阈值内）则复用该网格
+				// 配置一致（分辨率、矩阵、手柄偏移均在阈值内）则复用该Mesh
 				if (bakeSettings.Equals(bake.Settings))
 				{
 					mesh = bake.DeformedMesh;
@@ -60,9 +60,9 @@ namespace EasyMeshDeformation.Editor
 			return false;
 		}
 
-		/// <summary>将一次烘焙结果（配置快照 + 变形网格）存入缓存。</summary>
-		/// <param name="modifier">产生该网格的修改器组件（用于记录配置快照）。</param>
-		/// <param name="mesh">计算出的变形网格。</param>
+		/// <summary>将一次烘焙结果（配置快照 + 变形Mesh）存入缓存。</summary>
+		/// <param name="modifier">产生该Mesh的修改器组件（用于记录配置快照）。</param>
+		/// <param name="mesh">计算出的变形Mesh。</param>
 		internal void Add(MeshDeformer modifier, Mesh mesh)
 		{
 			// 记录修改器配置快照，供后续 TryGet 比对
@@ -72,7 +72,7 @@ namespace EasyMeshDeformation.Editor
 				DeformedMesh = mesh,
 			};
 
-			// 目标网格还没有分组时先创建列表
+			// 目标Mesh还没有分组时先创建列表
 			if (!_bakedMeshes.TryGetValue(modifier.TargetMesh, out List<Bake> bakes))
 			{
 				bakes = new();
@@ -82,13 +82,13 @@ namespace EasyMeshDeformation.Editor
 			bakes.Add(bake);
 		}
 
-		/// <summary>一条烘焙记录：配置快照（Settings）与产出的变形网格（DeformedMesh）。</summary>
+		/// <summary>一条烘焙记录：配置快照（Settings）与产出的变形Mesh（DeformedMesh）。</summary>
 		private struct Bake
 		{
 			/// <summary>烘焙时使用的修改器配置快照。</summary>
 			public BakedSettings Settings;
 
-			/// <summary>由该配置计算得到的变形网格。</summary>
+			/// <summary>由该配置计算得到的变形Mesh。</summary>
 			public Mesh DeformedMesh;
 
 			/// <summary>比较两条记录是否配置一致（仅比较 Settings）。</summary>
@@ -101,7 +101,7 @@ namespace EasyMeshDeformation.Editor
 		/// <summary>烘焙时使用的"修改器 + 晶格"配置快照：记录应用方式与所有晶格条目的关键参数。</summary>
 		private struct BakedSettings
 		{
-			/// <summary>变形应用方式（作用于整个网格的全局配置）。</summary>
+			/// <summary>变形应用方式（作用于整个Mesh的全局配置）。</summary>
 			public ApplyMethod ApplyMethod;
 
 			/// <summary>参与变形的每个晶格条目的配置快照列表。</summary>

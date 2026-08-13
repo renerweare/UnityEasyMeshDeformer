@@ -4,7 +4,7 @@ using UnityEngine.Rendering;
 namespace EasyMeshDeformation
 {
 	/// <summary>
-	/// 网格顶点缓冲的布局信息：顶点数量、主/附加缓冲步长（stride）及各顶点属性（位置/法线/切线/颜色/多组 UV）的字节偏移。
+	/// Mesh顶点缓冲的布局信息：顶点数量、主/附加缓冲步长（stride）及各顶点属性（位置/法线/切线/颜色/多组 UV）的字节偏移。
 	/// CPU（DeformSolver/回读）与 GPU（DeformFeature）共用，确保按正确偏移读写 GPU 顶点缓冲中的每个属性。
 	/// </summary>
 	public readonly struct MeshInfo
@@ -44,7 +44,7 @@ namespace EasyMeshDeformation
 		/// UV7 的字节偏移。
 		public readonly int TexCoord7Offset;
 
-		/// 从网格读取并缓存各缓冲的步长与属性偏移。
+		/// 从Mesh读取并缓存各缓冲的步长与属性偏移。
 		public MeshInfo(Mesh mesh)
 		{
 			VertexCount = mesh.vertexCount;
@@ -83,7 +83,7 @@ namespace EasyMeshDeformation
 			};
 		}
 
-		/// 网格是否存在附加顶点缓冲（即附加缓冲步长不为 0）。
+		/// Mesh是否存在附加顶点缓冲（即附加缓冲步长不为 0）。
 		public readonly bool HasAdditionalBuffer() => AdditionalStride != 0;
 	}
 }

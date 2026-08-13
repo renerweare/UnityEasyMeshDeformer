@@ -1,14 +1,14 @@
 // ============================================================================
-// MeshDeformer.cs —— 网格变形器（继承 MeshDeformerBase 的具体实现）
-// 核心机制：按 Mode 对普通网格或蒙皮网格变形；蒙皮模式经 TryGetSkinnedBuffer()
+// MeshDeformer.cs —— Mesh变形器（继承 MeshDeformerBase 的具体实现）
+// 核心机制：按 Mode 对普通Mesh或Skinned Mesh变形；蒙皮模式经 TryGetSkinnedBuffer()
 // 读取 GPU 蒙皮后的顶点缓冲再变形；编辑器 Update 检测模式切换，切换前恢复
-// 旧网格避免 sharedMesh 悬空。
+// 旧Mesh避免 sharedMesh 悬空。
 // ============================================================================
 using UnityEngine;
 
 namespace EasyMeshDeformation
 {
-	/// <summary>网格变形器：通过「模式」选择对普通网格或蒙皮网格应用晶格变形。</summary>
+	/// <summary>Mesh变形器：通过「模式」选择对普通Mesh或Skinned Mesh应用晶格变形。</summary>
 	[ExecuteAlways]
 	[DisallowMultipleComponent]
 	public class MeshDeformer : MeshDeformerBase
@@ -16,10 +16,10 @@ namespace EasyMeshDeformation
 		/// <summary>变形目标的类型。</summary>
 		public enum Mode
 		{
-			/// <summary>网格：对 MeshFilter / MeshRenderer 的网格应用变形。</summary>
-			[InspectorName("网格")] Mesh,
-			/// <summary>蒙皮网格：对 SkinnedMeshRenderer 的蒙皮网格应用变形（GPU 蒙皮后变形）。</summary>
-			[InspectorName("蒙皮网格")] Skinned,
+			/// <summary>Mesh：对 MeshFilter / MeshRenderer 的Mesh应用变形。</summary>
+			[InspectorName("Mesh")] Mesh,
+			/// <summary>Skinned Mesh：对 SkinnedMeshRenderer 的Skinned Mesh应用变形（GPU 蒙皮后变形）。</summary>
+			[InspectorName("Skinned Mesh")] Skinned,
 		}
 
 		#region Constants
@@ -27,30 +27,30 @@ namespace EasyMeshDeformation
 		/// <summary>「模式」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string ModeTooltip =
 			"变形目标的类型：\n" +
-			" - 网格：对 MeshFilter/MeshRenderer 的网格变形。\n" +
-			" - 蒙皮网格：对 SkinnedMeshRenderer 的蒙皮网格变形。";
+			" - Mesh：对 MeshFilter/MeshRenderer 的Mesh变形。\n" +
+			" - Skinned Mesh：对 SkinnedMeshRenderer 的Skinned Mesh变形。";
 
-		/// <summary>GPU 蒙皮未启用时的错误提示文案（蒙皮网格变形依赖 GPU 蒙皮）。</summary>
+		/// <summary>GPU 蒙皮未启用时的错误提示文案（Skinned Mesh变形依赖 GPU 蒙皮）。</summary>
 		private const string GpuSkinningError =
-			"尚未在 Player Settings 中启用 GPU 蒙皮！蒙皮网格变形将不会生效。\n" +
+			"尚未在 Player Settings 中启用 GPU 蒙皮！Skinned Mesh变形将不会生效。\n" +
 			"请打开 Player Settings（编辑 > 项目设置... > 播放器），确保 GPU 蒙皮已启用或设置为 GPU/GPU Batched。";
 
 		#endregion
 
 		#region Fields
 
-		/// <summary>变形目标类型（网格 / 蒙皮网格），在 Inspector 中切换。</summary>
+		/// <summary>变形目标类型（Mesh / Skinned Mesh），在 Inspector 中切换。</summary>
 		[SerializeField, Tooltip(ModeTooltip)]
 		private Mode _mode = Mode.Mesh;
 
-		// 网格模式
-		/// <summary>网格模式使用的 MeshFilter 组件（懒获取并缓存）。</summary>
+		// Mesh模式
+		/// <summary>Mesh模式使用的 MeshFilter 组件（懒获取并缓存）。</summary>
 		private MeshFilter _meshFilter;
-		/// <summary>网格模式使用的 MeshRenderer 组件（懒获取并缓存）。</summary>
+		/// <summary>Mesh模式使用的 MeshRenderer 组件（懒获取并缓存）。</summary>
 		private MeshRenderer _meshRenderer;
 
-		// 蒙皮网格模式
-		/// <summary>蒙皮网格模式使用的 SkinnedMeshRenderer 组件（懒获取并缓存）。</summary>
+		// Skinned Mesh模式
+		/// <summary>Skinned Mesh模式使用的 SkinnedMeshRenderer 组件（懒获取并缓存）。</summary>
 		private SkinnedMeshRenderer _skinnedMeshRenderer;
 		/// <summary>GPU 蒙皮后的顶点缓冲（每次 Enqueue 时从渲染器重新获取）。</summary>
 		private GraphicsBuffer _skinnedVertexBuffer;
@@ -64,7 +64,7 @@ namespace EasyMeshDeformation
 
 		#region Properties
 
-		/// <summary>变形目标类型；设置新值时先恢复旧渲染器网格，再切换并重新初始化。</summary>
+		/// <summary>变形目标类型；设置新值时先恢复旧渲染器Mesh，再切换并重新初始化。</summary>
 		public Mode DeformMode
 		{
 			get => _mode;
@@ -72,7 +72,7 @@ namespace EasyMeshDeformation
 			{
 				if (value == _mode) return;
 
-				// 切换模式前先恢复渲染网格，避免工作副本被销毁后 sharedMesh 悬空
+				// 切换模式前先恢复渲染Mesh，避免工作副本被销毁后 sharedMesh 悬空
 				RestoreOriginalMesh();
 
 				_mode = value;
@@ -101,7 +101,7 @@ namespace EasyMeshDeformation
 		#region Protected Methods
 
 		/// <inheritdoc cref="MeshDeformerBase.GetMesh"/>
-		/// <summary>按当前模式获取渲染器上的网格（蒙皮模式返回 sharedMesh，否则 MeshFilter.sharedMesh）。</summary>
+		/// <summary>按当前模式获取渲染器上的Mesh（蒙皮模式返回 sharedMesh，否则 MeshFilter.sharedMesh）。</summary>
 		protected override Mesh GetMesh()
 		{
 			if (_mode == Mode.Skinned) return SkinnedMeshRenderer != null ? SkinnedMeshRenderer.sharedMesh : null;
@@ -109,7 +109,7 @@ namespace EasyMeshDeformation
 		}
 
 		/// <inheritdoc cref="MeshDeformerBase.SetMesh"/>
-		/// <summary>按当前模式把网格写入渲染器；蒙皮模式保证至少一根骨骼使 GPU 蒙皮走正确缓冲路径。</summary>
+		/// <summary>按当前模式把Mesh写入渲染器；蒙皮模式保证至少一根骨骼使 GPU 蒙皮走正确缓冲路径。</summary>
 		protected override void SetMesh(Mesh mesh)
 		{
 			if (_mode == Mode.Skinned)
@@ -120,7 +120,7 @@ namespace EasyMeshDeformation
 #endif
 				if (SkinnedMeshRenderer == null) return;
 
-				// 写入蒙皮网格
+				// 写入Skinned Mesh
 				SkinnedMeshRenderer.sharedMesh = mesh;
 
 				// 保证渲染器至少有一根骨骼，确保渲染时使用正确的顶点缓冲
@@ -243,10 +243,10 @@ namespace EasyMeshDeformation
 
 		#region Private Methods
 
-		/// <summary>切换模式前把渲染网格恢复为原始目标网格，避免工作副本被销毁后 sharedMesh 悬空；按旧模式恢复。</summary>
+		/// <summary>切换模式前把渲染Mesh恢复为原始目标Mesh，避免工作副本被销毁后 sharedMesh 悬空；按旧模式恢复。</summary>
 		private void RestoreOriginalMesh()
 		{
-			// 无目标网格时不动渲染器，避免把 sharedMesh 误置为 null
+			// 无目标Mesh时不动渲染器，避免把 sharedMesh 误置为 null
 			if (TargetMesh == null) return;
 
 			if (_currentMode == Mode.Skinned)
@@ -265,12 +265,12 @@ namespace EasyMeshDeformation
 
 #if UNITY_EDITOR
 		/// <inheritdoc cref="MeshDeformerBase.Update"/>
-		/// <summary>编辑器每帧回调：检测模式切换并重新初始化（先恢复旧渲染器网格），否则走基类逻辑。</summary>
+		/// <summary>编辑器每帧回调：检测模式切换并重新初始化（先恢复旧渲染器Mesh），否则走基类逻辑。</summary>
 		protected override void Update()
 		{
 			if (_mode != _currentMode)
 			{
-				// 先恢复旧 renderer 网格，避免工作副本被销毁后 sharedMesh 悬空
+				// 先恢复旧 renderer Mesh，避免工作副本被销毁后 sharedMesh 悬空
 				RestoreOriginalMesh();
 
 				_currentMode = _mode;

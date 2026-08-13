@@ -1,8 +1,8 @@
 // ============================================================================
 // 文件：DeformEditorFeature.cs
 // 作用：把运行时变形系统接入编辑器生命周期：程序集重载后初始化；
-//       场景保存前/后还原/应用变形网格，避免把变形结果写进场景文件；
-//       光照烘焙前烘焙静态网格；右键菜单提供「保存变形网格」入口。
+//       场景保存前/后还原/应用变形Mesh，避免把变形结果写进场景文件；
+//       光照烘焙前烘焙静态Mesh；右键菜单提供「保存变形Mesh」入口。
 // ============================================================================
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -88,19 +88,19 @@ namespace EasyMeshDeformation.Editor
 
 		#region Scene Cleanup
 
-		/// <summary>场景保存完成后恢复所有网格为变形后版本。</summary>
+		/// <summary>场景保存完成后恢复所有Mesh为变形后版本。</summary>
 		private static void OnSceneSaved(Scene scene)
 		{
 			ApplyMeshes();
 		}
 
-		/// <summary>场景保存前把所有网格还原为未变形版本，避免变形结果写进场景文件。</summary>
+		/// <summary>场景保存前把所有Mesh还原为未变形版本，避免变形结果写进场景文件。</summary>
 		private static void OnSceneSaving(Scene scene, string path)
 		{
 			ResetMeshes();
 		}
 
-		/// <summary>光照贴图烘焙开始前，先烘焙所有静态变形网格。</summary>
+		/// <summary>光照贴图烘焙开始前，先烘焙所有静态变形Mesh。</summary>
 		private static void OnLightmapBakeStarted()
 		{
 #pragma warning disable 0618
@@ -115,7 +115,7 @@ namespace EasyMeshDeformation.Editor
 			}
 		}
 
-		/// <summary>把场景中所有启用的变形器的网格还原为未变形版本。</summary>
+		/// <summary>把场景中所有启用的变形器的Mesh还原为未变形版本。</summary>
 		private static void ResetMeshes()
 		{
 #pragma warning disable 0618
@@ -128,7 +128,7 @@ namespace EasyMeshDeformation.Editor
 			}
 		}
 
-		/// <summary>把场景中所有启用的变形器的网格恢复为变形后版本。</summary>
+		/// <summary>把场景中所有启用的变形器的Mesh恢复为变形后版本。</summary>
 		private static void ApplyMeshes()
 		{
 #pragma warning disable 0618
@@ -145,15 +145,15 @@ namespace EasyMeshDeformation.Editor
 
 		#region Context Menus
 
-		/// <summary>弹出保存面板，把变形后的普通网格另存为资产文件。</summary>
-		/// <param name="modifier">要导出网格的变形器组件。</param>
+		/// <summary>弹出保存面板，把变形后的普通Mesh另存为资产文件。</summary>
+		/// <param name="modifier">要导出Mesh的变形器组件。</param>
 		private static void SaveDeformedMesh(MeshDeformerBase modifier)
 		{
 			string path = EditorUtility.SaveFilePanelInProject(
-				"保存变形网格",
+				"保存变形Mesh",
 				modifier.gameObject.name,
 				"asset",
-				"请输入要保存变形网格的路径。"
+				"请输入要保存变形Mesh的路径。"
 			);
 
 			// 用户取消保存时 path 为空，直接返回
@@ -164,15 +164,15 @@ namespace EasyMeshDeformation.Editor
 			}
 		}
 
-		/// <summary>弹出保存面板，把变形后的蒙皮网格另存为资产文件。</summary>
-		/// <param name="modifier">要导出蒙皮网格的变形器组件。</param>
+		/// <summary>弹出保存面板，把变形后的Skinned Mesh另存为资产文件。</summary>
+		/// <param name="modifier">要导出Skinned Mesh的变形器组件。</param>
 		private static void SaveDeformedSkinnedMesh(MeshDeformerBase modifier)
 		{
 			string path = EditorUtility.SaveFilePanelInProject(
-				"保存变形蒙皮网格",
+				"保存变形Skinned Mesh",
 				modifier.gameObject.name,
 				"asset",
-				"请输入要保存变形蒙皮网格的路径。"
+				"请输入要保存变形Skinned Mesh的路径。"
 			);
 
 			// 用户取消保存时 path 为空，直接返回
@@ -183,48 +183,48 @@ namespace EasyMeshDeformation.Editor
 			}
 		}
 
-		/// <summary>菜单校验：右键组件标题栏时，目标为 MeshDeformer 才启用「保存变形网格...」。</summary>
-		[MenuItem("CONTEXT/MeshDeformer/保存变形网格...", true)]
+		/// <summary>菜单校验：右键组件标题栏时，目标为 MeshDeformer 才启用「保存变形Mesh...」。</summary>
+		[MenuItem("CONTEXT/MeshDeformer/保存变形Mesh...", true)]
 		private static bool SaveDeformedMeshValidate(MenuCommand command)
 		{
 			return command.context is MeshDeformer;
 		}
 
-		/// <summary>菜单回调：保存普通变形网格。</summary>
-		[MenuItem("CONTEXT/MeshDeformer/保存变形网格...")]
+		/// <summary>菜单回调：保存普通变形Mesh。</summary>
+		[MenuItem("CONTEXT/MeshDeformer/保存变形Mesh...")]
 		private static void SaveDeformedMesh(MenuCommand command)
 		{
 			if (command.context is not MeshDeformer modifier) return;
 			SaveDeformedMesh(modifier);
 		}
 
-		/// <summary>菜单校验：仅当组件处于 Skinned 模式时「保存变形蒙皮网格...」可用。</summary>
-		[MenuItem("CONTEXT/MeshDeformer/保存变形蒙皮网格...", true)]
+		/// <summary>菜单校验：仅当组件处于 Skinned 模式时「保存变形Skinned Mesh...」可用。</summary>
+		[MenuItem("CONTEXT/MeshDeformer/保存变形Skinned Mesh...", true)]
 		private static bool SaveDeformedSkinnedMeshValidate(MenuCommand command)
 		{
 			if (command.context is not MeshDeformer modifier) return false;
 			return modifier.DeformMode == MeshDeformer.Mode.Skinned;
 		}
 
-		/// <summary>菜单回调：保存蒙皮变形网格。</summary>
-		[MenuItem("CONTEXT/MeshDeformer/保存变形蒙皮网格...")]
+		/// <summary>菜单回调：保存蒙皮变形Mesh。</summary>
+		[MenuItem("CONTEXT/MeshDeformer/保存变形Skinned Mesh...")]
 		private static void SaveDeformedSkinnedMesh(MenuCommand command)
 		{
 			if (command.context is not MeshDeformer modifier) return;
 			SaveDeformedSkinnedMesh(modifier);
 		}
 
-		/// <summary>属性右键菜单回调：在组件字段上右键时追加「保存变形网格」等菜单项。</summary>
+		/// <summary>属性右键菜单回调：在组件字段上右键时追加「保存变形Mesh」等菜单项。</summary>
 		private static void OnContextualPropertyMenu(GenericMenu menu, SerializedProperty property)
 		{
 			if (property.serializedObject.targetObject is not MeshDeformer modifier) return;
 
-			menu.AddItem(new GUIContent("保存变形网格..."), false, () => SaveDeformedMesh(modifier));
+			menu.AddItem(new GUIContent("保存变形Mesh..."), false, () => SaveDeformedMesh(modifier));
 
-			// Skinned 模式：额外提供保存蒙皮变形网格入口
+			// Skinned 模式：额外提供保存蒙皮变形Mesh入口
 			if (modifier.DeformMode == MeshDeformer.Mode.Skinned)
 			{
-				menu.AddItem(new GUIContent("保存变形蒙皮网格..."), false, () => SaveDeformedSkinnedMesh(modifier));
+				menu.AddItem(new GUIContent("保存变形Skinned Mesh..."), false, () => SaveDeformedSkinnedMesh(modifier));
 			}
 		}
 

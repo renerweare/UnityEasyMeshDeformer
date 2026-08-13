@@ -1,6 +1,6 @@
 // ============================================================================
 // DeformerCube.cs —— FFD（自由变形）晶格控制体
-// 核心机制：晶格 = _resolution（每轴 ≥ 2）的 3D 控制点网格，每点是一个
+// 核心机制：晶格 = _resolution（每轴 ≥ 2）的 3D 控制点Mesh，每点是一个
 // DeformerHandle 子物体；GetIndex/GetCoords 做 FFD 索引换算（x 最快、z 最慢），
 // 每帧 LateUpdate 把各控制点 offset 汇总到 Offsets 缓冲供 compute shader 使用。
 // ============================================================================
@@ -10,7 +10,7 @@ using UnityEngine.Animations;
 
 namespace EasyMeshDeformation
 {
-	/// <summary>变形晶格组件：由控制点（DeformerHandle）构成的 3D 网格，是 FFD 的「笼子」。</summary>
+	/// <summary>变形晶格组件：由控制点（DeformerHandle）构成的 3D Mesh，是 FFD 的「笼子」。</summary>
 	[ExecuteAlways]
 	public class DeformerCube : MonoBehaviour
 	{
@@ -67,7 +67,7 @@ namespace EasyMeshDeformation
 		[SerializeField, Range(0f, 1f)] private float _selectionFalloffStrength = 0.5f;
 
 		/// <summary>仅用「生效控制点」列表中的控制点推动变形（其余视为未移动），由编辑器右键菜单设置。</summary>
-		[Tooltip("启用后，只有「生效控制点」列表中的控制点会推动网格变形，其余控制点视为未移动。\n" +
+		[Tooltip("启用后，只有「生效控制点」列表中的控制点会推动Mesh变形，其余控制点视为未移动。\n" +
 			"在 Scene 中框选控制点后右键 → 「将选中的控制点设为生效」来设置。")]
 		[SerializeField] private bool _useEnabledHandlesOnly = false;
 

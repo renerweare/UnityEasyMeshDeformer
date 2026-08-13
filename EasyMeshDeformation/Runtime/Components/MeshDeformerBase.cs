@@ -1,8 +1,8 @@
 // ============================================================================
-// MeshDeformerBase.cs —— 网格变形器抽象基类
-// 核心机制：复制目标网格为工作副本并建立 GPU 顶点缓冲，每帧经 DeformFeature
+// MeshDeformerBase.cs —— Mesh变形器抽象基类
+// 核心机制：复制目标Mesh为工作副本并建立 GPU 顶点缓冲，每帧经 DeformFeature
 // 入队后由 compute shader 在 GPU 上做 FFD 变形，全程不读回 CPU；更新时机由
-// UpdateMode 控制，OnDisable 时恢复原始网格并释放全部 GPU 缓冲。
+// UpdateMode 控制，OnDisable 时恢复原始Mesh并释放全部 GPU 缓冲。
 // ============================================================================
 using System;
 using System.Collections.Generic;
@@ -14,14 +14,14 @@ using UnityEngine.Rendering;
 
 namespace EasyMeshDeformation
 {
-	/// <summary>网格变形器抽象基类：负责目标网格复制、GPU 顶点缓冲创建释放与每帧入队变形任务。</summary>
+	/// <summary>Mesh变形器抽象基类：负责目标Mesh复制、GPU 顶点缓冲创建释放与每帧入队变形任务。</summary>
 	abstract public class MeshDeformerBase : MonoBehaviour
 	{
 		#region Constants
 
-		/// <summary>「目标网格」字段在 Inspector 中的 Tooltip 文案。</summary>
+		/// <summary>「目标Mesh」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string TargetMeshTooltip =
-			"要对其应用变形并在此物体上渲染的网格。";
+			"要对其应用变形并在此物体上渲染的Mesh。";
 
 		/// <summary>「更新模式」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string UpdateModeTooltip =
@@ -30,7 +30,7 @@ namespace EasyMeshDeformation
 
 		/// <summary>「晶格列表」字段在 Inspector 中的 Tooltip 文案。</summary>
 		private const string ItemsTooltip =
-			"应用于目标网格的晶格。\n" +
+			"应用于目标Mesh的晶格。\n" +
 			"将按顺序在蒙皮之前应用。";
 
 		/// <summary>顶点缓冲的 GraphicsBuffer 目标类型：Raw + CopySource/CopyDestination（每帧拷贝原始顶点用于复位）。</summary>
@@ -41,7 +41,7 @@ namespace EasyMeshDeformation
 
 		#region Fields
 
-		/// <summary>目标网格：要对其应用变形并渲染的网格，为空时由 Initialise 从渲染器读取。</summary>
+		/// <summary>目标Mesh：要对其应用变形并渲染的Mesh，为空时由 Initialise 从渲染器读取。</summary>
 		[SerializeField, NotKeyable, Tooltip(TargetMeshTooltip)]
 		private Mesh _targetMesh;
 
@@ -49,7 +49,7 @@ namespace EasyMeshDeformation
 		[SerializeField, Tooltip(UpdateModeTooltip)]
 		private UpdateMode _updateMode = UpdateMode.WhenVisible;
 
-		/// <summary>应用于目标网格的晶格列表，默认含一个空项保证开箱即用。</summary>
+		/// <summary>应用于目标Mesh的晶格列表，默认含一个空项保证开箱即用。</summary>
 		[SerializeField, Tooltip(ItemsTooltip)]
 		private List<DeformerItem> _items = new()
 		{
@@ -59,7 +59,7 @@ namespace EasyMeshDeformation
 			}
 		};
 
-		/// <summary>目标网格的运行时工作副本：变形结果写入此网格，而不是污染源资源。</summary>
+		/// <summary>目标Mesh的运行时工作副本：变形结果写入此Mesh，而不是污染源资源。</summary>
 		private Mesh _mesh;
 
 		/// <summary>工作副本的顶点信息（顶点数、缓冲布局等），用于创建 / 拷贝 GPU 缓冲。</summary>
@@ -74,16 +74,16 @@ namespace EasyMeshDeformation
 		/// <summary>GPU 附加缓冲（stream 1：额外的顶点属性，如 UV）。</summary>
 		private GraphicsBuffer _additionalBuffer;
 
-		/// <summary>各子网格去重后的三角形索引 ComputeBuffer 列表，供 compute shader 使用。</summary>
+		/// <summary>各子Mesh去重后的三角形索引 ComputeBuffer 列表，供 compute shader 使用。</summary>
 		private List<ComputeBuffer> _indexBuffers;
 
 		/// <summary>标记本帧是否已入队变形任务，避免同一帧重复入队。</summary>
 		private bool _ranThisFrame = false;
 
-		/// <summary>解析后的变形应用方式（位置/法线/切线 或 仅位置），由目标网格的顶点属性决定。</summary>
+		/// <summary>解析后的变形应用方式（位置/法线/切线 或 仅位置），由目标Mesh的顶点属性决定。</summary>
 		private ApplyMethod _resolvedApplyMethod;
 
-		/// <summary>记录上一次 Initialise 时的目标网格引用，用于在编辑器中检测 Inspector 的切换。</summary>
+		/// <summary>记录上一次 Initialise 时的目标Mesh引用，用于在编辑器中检测 Inspector 的切换。</summary>
 		private Mesh _currentTargetMesh;
 
 		/// <summary>记录上一次 Initialise 时的 isStatic 状态，用于在编辑器中检测 Inspector 的切换。</summary>
@@ -93,13 +93,13 @@ namespace EasyMeshDeformation
 
 		#region Properties
 
-		/// <summary>要应用到此网格上的晶格（DeformerItem）列表。</summary>
+		/// <summary>要应用到此Mesh上的晶格（DeformerItem）列表。</summary>
 		public List<DeformerItem> Items => _items;
 
 		/// <summary>变形更新与应用的时机（仅非蒙皮模式生效）。</summary>
 		public UpdateMode UpdateMode { get => _updateMode; set => _updateMode = value; }
 
-		/// <summary>要对其应用变形的网格；赋值后若已启用会立即重新初始化。</summary>
+		/// <summary>要对其应用变形的Mesh；赋值后若已启用会立即重新初始化。</summary>
 		public Mesh TargetMesh
 		{
 			get => _targetMesh;
@@ -113,28 +113,28 @@ namespace EasyMeshDeformation
 			}
 		}
 
-		/// <summary>用于渲染的网格（工作副本）。内部使用。</summary>
+		/// <summary>用于渲染的Mesh（工作副本）。内部使用。</summary>
 		internal Mesh Mesh => _mesh;
 
-		/// <summary>关于此网格的顶点信息。内部使用。</summary>
+		/// <summary>关于此Mesh的顶点信息。内部使用。</summary>
 		internal MeshInfo MeshInfo => _meshInfo;
 
 		/// <summary>解析后的变形应用方式（缺法线/切线时降级为仅变形位置）。内部使用。</summary>
 		internal ApplyMethod ResolvedApplyMethod => _resolvedApplyMethod;
 
-		/// <summary>此网格顶点缓冲的副本，用于每帧复位顶点。内部使用。</summary>
+		/// <summary>此Mesh顶点缓冲的副本，用于每帧复位顶点。内部使用。</summary>
 		internal GraphicsBuffer CopyBuffer => _copyBuffer;
 
-		/// <summary>此网格的 GPU 顶点缓冲（stream 0）。内部使用。</summary>
+		/// <summary>此Mesh的 GPU 顶点缓冲（stream 0）。内部使用。</summary>
 		internal GraphicsBuffer VertexBuffer => _vertexBuffer;
 
-		/// <summary>此网格的附加缓冲（stream 1）。内部使用。</summary>
+		/// <summary>此Mesh的附加缓冲（stream 1）。内部使用。</summary>
 		internal GraphicsBuffer AdditionalBuffer => _additionalBuffer;
 
-		/// <summary>此网格各子网格的（去重后的）索引缓冲列表。内部使用。</summary>
+		/// <summary>此Mesh各子Mesh的（去重后的）索引缓冲列表。内部使用。</summary>
 		internal List<ComputeBuffer> IndexBuffers => GetIndexBuffers();
 
-		/// <summary>网格的本地→世界变换矩阵。内部使用。</summary>
+		/// <summary>Mesh的本地→世界变换矩阵。内部使用。</summary>
 		internal Matrix4x4 LocalToWorld => transform.localToWorldMatrix;
 
 		/// <summary>应用蒙皮变形时使用的矩阵；蒙皮模式下子类可覆写（如返回根骨骼矩阵）。</summary>
@@ -153,13 +153,13 @@ namespace EasyMeshDeformation
 			EnqueueIfNeeded(true);
 		}
 
-		/// <summary>把变形后的工作副本网格（_mesh）应用到渲染器。</summary>
+		/// <summary>把变形后的工作副本Mesh（_mesh）应用到渲染器。</summary>
 		internal void ApplyMesh()
 		{
 			SetMesh(_mesh);
 		}
 
-		/// <summary>把原始目标网格（_targetMesh）恢复应用到渲染器，撤销变形显示。</summary>
+		/// <summary>把原始目标Mesh（_targetMesh）恢复应用到渲染器，撤销变形显示。</summary>
 		internal void ResetMesh()
 		{
 			SetMesh(_targetMesh);
@@ -176,7 +176,7 @@ namespace EasyMeshDeformation
 			return false;
 		}
 
-		/// <summary>释放所有 GPU 缓冲与工作副本网格（Initialise 重建前与 OnDisable 时调用）。</summary>
+		/// <summary>释放所有 GPU 缓冲与工作副本Mesh（Initialise 重建前与 OnDisable 时调用）。</summary>
 		protected virtual void Release()
 		{
 			_copyBuffer?.Release();
@@ -212,10 +212,10 @@ namespace EasyMeshDeformation
 			}
 		}
 
-		/// <summary>获取当前网格：从 MeshFilter 或 SkinnedMeshRenderer 读取。</summary>
+		/// <summary>获取当前Mesh：从 MeshFilter 或 SkinnedMeshRenderer 读取。</summary>
 		protected abstract Mesh GetMesh();
 
-		/// <summary>设置网格：写入 MeshFilter 或 SkinnedMeshRenderer。</summary>
+		/// <summary>设置Mesh：写入 MeshFilter 或 SkinnedMeshRenderer。</summary>
 		protected abstract void SetMesh(Mesh mesh);
 
 		/// <summary>把本变形器入队等待本帧执行变形 compute shader；ignoreMode=true 时无视 UpdateMode 强制入队。</summary>
@@ -235,10 +235,10 @@ namespace EasyMeshDeformation
 			}
 		}
 
-		/// <summary>初始化变形器：确定源网格 → 释放旧资源 → 复制工作副本 → 建立 GPU 缓冲。</summary>
+		/// <summary>初始化变形器：确定源Mesh → 释放旧资源 → 复制工作副本 → 建立 GPU 缓冲。</summary>
 		private void Initialise()
 		{
-			// 顺序很重要：sharedMesh 可能正指向将被 Release 销毁的工作副本，需先取源网格
+			// 顺序很重要：sharedMesh 可能正指向将被 Release 销毁的工作副本，需先取源Mesh
 			if (_targetMesh == null)
 			{
 				_targetMesh = GetMesh();
@@ -251,24 +251,24 @@ namespace EasyMeshDeformation
 				}
 			}
 
-			// 释放所有旧缓冲 / 旧网格
+			// 释放所有旧缓冲 / 旧Mesh
 			Release();
 
 			// 记录当前状态，供编辑器 Update 检测 Inspector 中的变化
 			_currentTargetMesh = _targetMesh;
 			_currentIsStatic = gameObject.isStatic;
 
-			// 仍无目标网格则提前退出（未指定或渲染器上无网格，属正常情况）
+			// 仍无目标Mesh则提前退出（未指定或渲染器上无Mesh，属正常情况）
 			if (_targetMesh == null)
 			{
 				return;
 			}
 
-			// 网格不可读则报错并退出（静态网格会在运行时前烘焙，可忽略）
+			// Mesh不可读则报错并退出（静态Mesh会在运行时前烘焙，可忽略）
 			if (!_targetMesh.isReadable && !gameObject.isStatic)
 			{
-				Debug.LogError("目标网格未启用读写权限。请在模型导入设置中启用。\n" +
-					"或者，若打算用作静态网格，请将 GameObject 设为静态。", _targetMesh);
+				Debug.LogError("目标Mesh未启用读写权限。请在模型导入设置中启用。\n" +
+					"或者，若打算用作静态Mesh，请将 GameObject 设为静态。", _targetMesh);
 				return;
 			}
 
@@ -285,7 +285,7 @@ namespace EasyMeshDeformation
 				{
 					if (importer.importTangents == UnityEditor.ModelImporterTangents.CalculateMikk)
 					{
-						Debug.LogWarning("在没有 UV 映射的情况下使用「Calculate Mikktspace」，网格法线可能出现错误。\n" +
+						Debug.LogWarning("在没有 UV 映射的情况下使用「Calculate Mikktspace」，Mesh法线可能出现错误。\n" +
 							"要修复此问题，请在模型导入设置中将「Tangents」设为「Calculate Legacy」。\n" +
 							"遗憾的是，Unity 在没有 UV 映射时会认为不需要切线，但本例中并非如此。", _targetMesh);
 					}
@@ -293,7 +293,7 @@ namespace EasyMeshDeformation
 			}
 #endif
 
-			// 创建目标网格副本（工作副本）：变形写在此副本上，避免污染源资源
+			// 创建目标Mesh副本（工作副本）：变形写在此副本上，避免污染源资源
 			_mesh = Instantiate(_targetMesh);
 			_mesh.hideFlags |= HideFlags.DontSaveInEditor | HideFlags.DontSaveInBuild;
 			_mesh.name = _targetMesh.name + " (DeformerCube)";
@@ -311,11 +311,11 @@ namespace EasyMeshDeformation
 			// 无法线/切线时无法变形它们，降级为仅变形位置
 			if (!hasNormals || !hasTangents)
 			{
-				Debug.LogWarning("网格没有法线和切线时，无法对法线和切线进行变形。", this);
+				Debug.LogWarning("Mesh没有法线和切线时，无法对法线和切线进行变形。", this);
 				_resolvedApplyMethod = ApplyMethod.PositionOnly;
 			}
 
-			// 至少添加一根骨骼：确保带 blendShape 的网格渲染时走正确的顶点缓冲（GPU 蒙皮路径）
+			// 至少添加一根骨骼：确保带 blendShape 的Mesh渲染时走正确的顶点缓冲（GPU 蒙皮路径）
 			if ((_targetMesh.blendShapeCount > 0) && (_mesh.bindposes.Length == 0))
 			{
 				Matrix4x4[] bindPoses = new Matrix4x4[] { Matrix4x4.identity };
@@ -340,7 +340,7 @@ namespace EasyMeshDeformation
 				weights.Dispose();
 			}
 
-			// 收集网格顶点信息（顶点数、缓冲布局等）
+			// 收集Mesh顶点信息（顶点数、缓冲布局等）
 			_meshInfo = new(_mesh);
 
 			// 获取 GPU 顶点缓冲（stream 0）
@@ -360,7 +360,7 @@ namespace EasyMeshDeformation
 			Graphics.CopyBuffer(_vertexBuffer, _copyBuffer);
 		}
 
-		/// <summary>按需构建并缓存各子网格去重后的索引 ComputeBuffer。</summary>
+		/// <summary>按需构建并缓存各子Mesh去重后的索引 ComputeBuffer。</summary>
 		private List<ComputeBuffer> GetIndexBuffers()
 		{
 			if (_indexBuffers != null) return _indexBuffers;
@@ -370,7 +370,7 @@ namespace EasyMeshDeformation
 			List<int> indices = new();
 			for (int i = 0; i < _mesh.subMeshCount; i++)
 			{
-				// 获取第 i 个子网格的三角形索引
+				// 获取第 i 个子Mesh的三角形索引
 				_mesh.GetTriangles(indices, i, true);
 
 				// 去除重复索引（compute shader 逐顶点处理，重复索引无意义）
@@ -404,7 +404,7 @@ namespace EasyMeshDeformation
 			EnqueueIfNeeded(true);
 		}
 
-		/// <summary>组件禁用时把渲染器恢复为原始网格并释放全部 GPU 缓冲与工作副本。</summary>
+		/// <summary>组件禁用时把渲染器恢复为原始Mesh并释放全部 GPU 缓冲与工作副本。</summary>
 		protected virtual void OnDisable()
 		{
 			ResetMesh();
@@ -412,31 +412,31 @@ namespace EasyMeshDeformation
 		}
 
 #if UNITY_EDITOR
-		/// <summary>编辑器每帧回调：检测 Inspector 中目标网格/isStatic 变化并重置，确保渲染器挂的是工作副本。</summary>
+		/// <summary>编辑器每帧回调：检测 Inspector 中目标Mesh/isStatic 变化并重置，确保渲染器挂的是工作副本。</summary>
 		protected virtual void Update()
 		{
-			// Inspector 中目标网格或 isStatic 变化时重建组件
+			// Inspector 中目标Mesh或 isStatic 变化时重建组件
 			if ((_targetMesh != _currentTargetMesh) ||
 				(gameObject.isStatic != _currentIsStatic))
 			{
 				OnEnable();
 			}
 
-			// 烘焙光照贴图期间不要替换网格，否则烘焙结果会丢失
+			// 烘焙光照贴图期间不要替换Mesh，否则烘焙结果会丢失
 			if (gameObject.isStatic && UnityEditor.Lightmapping.isRunning)
 				return;
 
-			// 确保渲染器上的网格是变形后的工作副本（防止外部改回 sharedMesh）
+			// 确保渲染器上的Mesh是变形后的工作副本（防止外部改回 sharedMesh）
 			if ((_mesh != null) && (_mesh != GetMesh()))
 			{
 				ApplyMesh();
 			}
 		}
 
-		/// <summary>编辑器回调：选中预制体资产时重置渲染器网格，保证预制体预览显示源网格。</summary>
+		/// <summary>编辑器回调：选中预制体资产时重置渲染器Mesh，保证预制体预览显示源Mesh。</summary>
 		protected virtual void OnValidate()
 		{
-			// 选中预制体资源时重置网格，确保预制体预览中能看到网格
+			// 选中预制体资源时重置Mesh，确保预制体预览中能看到Mesh
 			if (UnityEditor.PrefabUtility.IsPartOfPrefabAsset(this))
 			{
 				void OnPreview()

@@ -29,7 +29,7 @@ namespace EasyMeshDeformation
 			{
 				Matrix4x4 rendererToLocal = worldToLocal * renderer.localToWorldMatrix;
 
-				// 蒙皮网格以 rootBone 为基准（骨骼根决定了蒙皮网格的实际包围范围）
+				// Skinned Mesh以 rootBone 为基准（骨骼根决定了Skinned Mesh的实际包围范围）
 				if ((renderer is SkinnedMeshRenderer skinnedRenderer) && (skinnedRenderer.rootBone != null))
 				{
 					rendererToLocal = worldToLocal * skinnedRenderer.rootBone.localToWorldMatrix;

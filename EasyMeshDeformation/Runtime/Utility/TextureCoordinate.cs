@@ -1,7 +1,7 @@
 namespace EasyMeshDeformation
 {
 	/// <summary>
-	/// 可用的纹理坐标（UV）集合，对应网格中的 TexCoord0 ~ TexCoord7 共 8 组 UV，用于遮罩系统选择采样依据。
+	/// 可用的纹理坐标（UV）集合，对应Mesh中的 TexCoord0 ~ TexCoord7 共 8 组 UV，用于遮罩系统选择采样依据。
 	/// </summary>
 	public enum TextureCoordinate : int
 	{

@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace EasyMeshDeformation.Editor
 {
-	/// <summary>三维数组工具类：把三维网格数据扁平化存储在一维列表中。</summary>
+	/// <summary>三维数组工具类：把三维Mesh数据扁平化存储在一维列表中。</summary>
 	/// <typeparam name="T">数组元素类型（如 float、Vector3）。</typeparam>
 	public class Array3D<T>
 	{

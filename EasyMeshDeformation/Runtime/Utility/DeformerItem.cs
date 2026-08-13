@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 namespace EasyMeshDeformation
 {
 	/// <summary>
-	/// 一个晶格项：引用一个晶格（DeformerCube），并为其单独配置插值方式、Global（越界处理）与遮罩。一个网格组件可挂多个晶格项，依次施加变形。
+	/// 一个晶格项：引用一个晶格（DeformerCube），并为其单独配置插值方式、Global（越界处理）与遮罩。一个Mesh组件可挂多个晶格项，依次施加变形。
 	/// </summary>
 	[Serializable]
 	public struct DeformerItem : ISerializationCallbackReceiver
@@ -24,7 +24,7 @@ namespace EasyMeshDeformation
 			" - 启用：变形会延续到晶格外部，与外部控制点保持一致。";
 
 		private const string MaskTooltip =
-			"遮罩选项。可用于控制网格上的变形范围。";
+			"遮罩选项。可用于控制Mesh上的变形范围。";
 
 		/// 要应用的晶格（DeformerCube 组件）。
 		[Tooltip(DeformerCubeTooltip)]

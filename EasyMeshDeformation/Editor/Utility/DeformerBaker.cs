@@ -1,6 +1,6 @@
 // ============================================================================
 // DeformerBaker.cs
-// 概述：烘焙工具：把 MeshDeformer 的实时变形结果固化到目标网格上，
+// 概述：烘焙工具：把 MeshDeformer 的实时变形结果固化到目标Mesh上，
 // 并通过 BakeLookup 缓存复用相同配置的计算结果。
 // 本类属于编辑器程序集，仅在编辑器环境下生效。
 // ============================================================================
@@ -15,17 +15,17 @@ namespace EasyMeshDeformation.Editor
 		/// <summary>复用的 CommandBuffer：向 GPU 提交变形计算命令（静态复用，避免反复分配）。</summary>
 		private static readonly CommandBuffer _cmd = new();
 
-		/// <summary>烘焙结果缓存表：以"目标网格 + 修改器配置"为键复用变形结果（见 <see cref="BakeLookup"/>）。</summary>
+		/// <summary>烘焙结果缓存表：以"目标Mesh + 修改器配置"为键复用变形结果（见 <see cref="BakeLookup"/>）。</summary>
 		private static readonly BakeLookup _lookup = new();
 
-		/// <summary>清空所有烘焙缓存（销毁临时网格并清空字典）。</summary>
+		/// <summary>清空所有烘焙缓存（销毁临时Mesh并清空字典）。</summary>
 		internal static void Clear()
 		{
 			_lookup.Clear();
 		}
 
-		/// <summary>将指定 MeshDeformer 的变形结果烘焙到其目标网格上。</summary>
-		/// <param name="modifier">要烘焙的网格修改器组件。</param>
+		/// <summary>将指定 MeshDeformer 的变形结果烘焙到其目标Mesh上。</summary>
+		/// <param name="modifier">要烘焙的Mesh修改器组件。</param>
 		/// <param name="lightmapping">是否为光照贴图烘焙：为 true 时保留修改器组件，以便光照阶段读取变形结果。</param>
 		internal static void Bake(MeshDeformer modifier, bool lightmapping = false)
 		{
@@ -44,8 +44,8 @@ namespace EasyMeshDeformation.Editor
 				_lookup.Add(modifier, deformedMesh);
 			}
 
-			// 非光照贴图烘焙：禁用修改器组件，让静态网格接管显示，
-			// 并把 MeshCollider 的共享网格替换为变形结果，保证物理与渲染一致
+			// 非光照贴图烘焙：禁用修改器组件，让静态Mesh接管显示，
+			// 并把 MeshCollider 的共享Mesh替换为变形结果，保证物理与渲染一致
 			if (!lightmapping)
 			{
 				modifier.enabled = false;
@@ -57,7 +57,7 @@ namespace EasyMeshDeformation.Editor
 				}
 			}
 
-			// 将变形网格写入 MeshFilter，完成烘焙
+			// 将变形Mesh写入 MeshFilter，完成烘焙
 			filter.sharedMesh = deformedMesh;
 		}
 	}

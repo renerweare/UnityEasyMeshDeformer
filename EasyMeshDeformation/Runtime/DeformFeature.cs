@@ -136,7 +136,7 @@ namespace EasyMeshDeformation
 
 		#region Private Methods
 
-		/// 对所有排队的普通网格组件执行变形（PlayerLoop 回调）。
+		/// 对所有排队的普通Mesh组件执行变形（PlayerLoop 回调）。
 		private static void ApplyModifiers()
 		{
 			if (_modifiers.Count == 0 || _cubeBuffer == null) return;
@@ -154,7 +154,7 @@ namespace EasyMeshDeformation
 			_modifiers.Clear();
 		}
 
-		/// 向命令缓冲区写入单个普通网格组件的变形命令：恢复原始顶点数据 → 设置参数/关键字 → 分派内核。
+		/// 向命令缓冲区写入单个普通Mesh组件的变形命令：恢复原始顶点数据 → 设置参数/关键字 → 分派内核。
 		internal static void ApplyModifier(CommandBuffer cmd, MeshDeformerBase modifier)
 		{
 			if ((modifier == null) || !modifier.IsValid) return;
@@ -168,7 +168,7 @@ namespace EasyMeshDeformation
 
 			cmd.SetComputeBufferParam(_compute, 0, VertexBufferId, modifier.VertexBuffer);
 
-			// 先用「原始网格副本」覆盖顶点缓冲，确保每帧从原始网格开始变形（非破坏性叠加）
+			// 先用「原始Mesh副本」覆盖顶点缓冲，确保每帧从原始Mesh开始变形（非破坏性叠加）
 			cmd.CopyBuffer(modifier.CopyBuffer, modifier.VertexBuffer);
 
 			MeshInfo info = modifier.MeshInfo;
@@ -179,7 +179,7 @@ namespace EasyMeshDeformation
 			ApplyItems(cmd, modifier, cubes, localToWorld, info, groups);
 		}
 
-		/// 对所有排队的蒙皮网格组件执行变形（PlayerLoop 回调，位于 UpdateAllSkinnedMeshes 之后，作用在蒙皮结果上）。
+		/// 对所有排队的Skinned Mesh组件执行变形（PlayerLoop 回调，位于 UpdateAllSkinnedMeshes 之后，作用在蒙皮结果上）。
 		private static void ApplySkinnedModifiers()
 		{
 			if (_skinnedModifiers.Count == 0 || _cubeBuffer == null) return;
@@ -197,7 +197,7 @@ namespace EasyMeshDeformation
 			_skinnedModifiers.Clear();
 		}
 
-		/// 向命令缓冲区写入单个蒙皮网格组件的变形命令。注意：蒙皮网格不恢复 CopyBuffer（蒙皮结果每帧由骨骼系统重新写入）。
+		/// 向命令缓冲区写入单个Skinned Mesh组件的变形命令。注意：Skinned Mesh不恢复 CopyBuffer（蒙皮结果每帧由骨骼系统重新写入）。
 		private static void ApplySkinnedModifier(CommandBuffer cmd, MeshDeformerBase modifier)
 		{
 			if ((modifier == null) || !modifier.IsValid || !modifier.TryGetSkinnedBuffer(out var skinnedBuffer)) return;
@@ -381,7 +381,7 @@ namespace EasyMeshDeformation
 			var postLateSystems = new List<PlayerLoopSystem>(postLateUpdate.subSystemList);
 			var skinned = postLateSystems.FindIndex(system => system.type == typeof(PostLateUpdate.UpdateAllSkinnedMeshes));
 
-			// 在蒙皮系统之前插入普通变形回调，使蒙皮可基于已变形的网格进行
+			// 在蒙皮系统之前插入普通变形回调，使蒙皮可基于已变形的Mesh进行
 			postLateSystems.Insert(skinned, new()
 			{
 				updateDelegate = ApplyModifiers,

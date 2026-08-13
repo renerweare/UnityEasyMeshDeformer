@@ -6,7 +6,7 @@ namespace EasyMeshDeformation
 {
 	/// <summary>
 	/// 启动（Start）时重新绑定（Rebind）Animator 的实用组件。
-	/// 适用场景：对「带 Animator 控制表情（blend shapes）的蒙皮网格」使用晶格变形时，需重新绑定 Animator 才能让变形后的网格正确参与骨骼/表情动画。
+	/// 适用场景：对「带 Animator 控制表情（blend shapes）的Skinned Mesh」使用晶格变形时，需重新绑定 Animator 才能让变形后的Mesh正确参与骨骼/表情动画。
 	/// </summary>
 	[ExecuteAlways]
 	[RequireComponent(typeof(Animator))]

@@ -3,7 +3,7 @@
 // 对目标 Transform 的位置 / 旋转 / 缩放应用晶格变形：
 // 取目标矩阵 → 依次应用每个晶格项的变形（DeformSolver.DeformTransform）→
 // 按 ApplyFlags 把变形后的分量写回自身。每帧 LateUpdate 执行。
-// 相当于原版 TransformLatticeModifier，但独立于 MeshDeformer 的网格模式。
+// 相当于原版 TransformLatticeModifier，但独立于 MeshDeformer 的Mesh模式。
 // ============================================================================
 using System;
 using System.Collections.Generic;

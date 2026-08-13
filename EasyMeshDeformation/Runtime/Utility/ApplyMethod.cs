@@ -3,7 +3,7 @@ using UnityEngine;
 namespace EasyMeshDeformation
 {
 	/// <summary>
-	/// 对网格应用变形的方法（决定除了位置之外还要变形哪些顶点属性）。
+	/// 对Mesh应用变形的方法（决定除了位置之外还要变形哪些顶点属性）。
 	/// </summary>
 	public enum ApplyMethod
 	{
