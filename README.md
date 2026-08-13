@@ -10,7 +10,7 @@
   - **Skinned Mesh**：变形 `SkinnedMeshRenderer` 
 - **GPU / CPU 双实现**：运行时用 Compute Shader（`DeformCompute.compute`）逐帧变形；CPU 侧 `DeformSolver` 供编辑器预览与烘焙。
 - **三种插值方式**：线性（清晰）/ 线性（平滑）/ 三次方。
-- **Global 开关**：晶格外变形衰减（关）/ 延续（开）。
+- **Global**：晶格外变形衰减（关）/ 延续（开）。
 - **乘数**：每个晶格项一个乘数（0~1）控制变形强度。
 
 ## 快速开始
