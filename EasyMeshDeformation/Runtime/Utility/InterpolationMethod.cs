@@ -8,15 +8,15 @@ namespace EasyMeshDeformation
 	public enum InterpolationMethod
 	{
 		/// 三线性插值，不做平滑处理（清晰锐利，计算量最小）。
-		[InspectorName("线性（清晰）")]
+		[InspectorName("Linear (Sharp)")]
 		LinearSharp = 1,
 
 		/// 三线性插值，但每个轴向上先经过 SmoothStep 平滑（产生更柔和的过渡）。
-		[InspectorName("线性（平滑）")]
+		[InspectorName("Linear (Smooth)")]
 		LinearSmooth = 0,
 
 		/// 三三次（Cubic）插值：每个顶点受 4×4×4 = 64 个控制点影响，最平滑但开销最高。
-		[InspectorName("三次方")]
+		[InspectorName("Cubic")]
 		Cubic = 2,
 	}
 }
