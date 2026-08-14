@@ -10,7 +10,7 @@ namespace EasyMeshDeformation
 	/// <summary>
 	/// 通过鼠标拖拽晶格控制点实现「拉扯变形」的示例控制器。
 	/// </summary>
-	public class GrabController : MonoBehaviour
+	public class GrabDeformer : MonoBehaviour
 	{
 		/// <summary>被拖拽的控制点坐标（固定为晶格第一个控制点）。</summary>
 		private readonly Vector3Int Handle = new(0, 0, 0);
